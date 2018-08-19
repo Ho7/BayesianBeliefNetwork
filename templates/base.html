@@ -1,0 +1,867 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Ho7">
+
+    <title>{{ title }}</title>
+
+    {% block css %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+              integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+              crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Amatic+SC|Caveat|Cormorant+Garamond|Oswald|Poiret+One|Russo+One|Yanone+Kaffeesatz"
+              rel="stylesheet">
+        <script src="https://use.fontawesome.com/e31e880d3d.js"></script>
+
+
+
+    {% endblock css %}
+
+</head>
+<body id="main">
+{% block body %}
+    {% block nav %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-warning">
+            <a class="navbar-brand" href="#">Bayes</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active pl-3">
+                        <a class="nav-link" href="#">Режим классической БСД <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item pl-3">
+                        <a class="nav-link" href="#">API</a>
+                    </li>
+                    <li class="nav-item pl-3">
+                        <a class="nav-link" href="#">Режим ???</a>
+                    </li>
+                </ul>
+
+            </div>
+        </nav>
+    {% endblock %}
+
+    {% block content %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" onclick="AddFact()" class="btn btn-info"><i class="fa fa-plus-circle"
+                                                                                      aria-hidden="true"></i></button>
+                    <button type="button" onclick="AddHypothesis()" class="btn btn-primary"><i
+                            class="fa fa-plus-square-o"
+                            aria-hidden="true"></i>
+                    </button>
+                    <button type="button" onclick="ClearWorkSpace()" class="btn btn-danger"><i class="fa fa-recycle"
+                                                                                               aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-success"><i class="fa fa-floppy-o" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="$('#importJSONmodal').modal('toggle')"><i class="fa fa-download" aria-hidden="true"></i>
+                        JSON
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="ExportToJSON()"><i class="fa fa-upload" aria-hidden="true"></i>
+                        JSON
+                    </button>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="divWith">
+
+
+            <div class="col-md-8" id="canvas">
+            </div>
+            <div class="col-md-4 text-center" style="border-left: 1px solid darkgray;" id="minus">
+                <h1>Инструкция </h1>
+                <hr>
+                <p>
+                    ВНИМАНИЕ ЭЛЕМЕНТЫ ДОБАВЛЯЮТСЯ НА ОДНУ И ТУ ЖЕ КООРДИНАТУ. ПОСЛЕ ДОБАВЛЕНИЯ ЭЛЕМЕНТА ПЕРЕМЕСТИТЕ ЕГО.
+                </p>
+                <hr>
+                <div class="accordion" id="accordionExample">
+
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse"
+                                        data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Элементы управления
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                             data-parent="#accordionExample">
+                            <div class="card-body">
+                                <p><i class="fa fa-plus-circle" aria-hidden="true" style="color: #17a2b8"></i> -
+                                    Добавление узла безусловной вероятности (знания)</p>
+                                <p><i class="fa fa-plus-square-o" aria-hidden="true" style="color: blue"></i> -
+                                    Добавление узла условной вероятности (гипотезы)</p>
+                                <p><i class="fa fa-recycle" aria-hidden="true" style="color: red"></i> - Очистить
+                                    рабочую область</p>
+                                <p><i class="fa fa-floppy-o" aria-hidden="true" style="color: forestgreen"></i> -
+                                    Сохранить и расчитать</p>
+                                <p><i class="fa fa-upload" aria-hidden="true" style="color: gray"></i>JSON -
+                                    Экспортировать в JSON</p>
+                                <p><i class="fa fa-download" aria-hidden="true" style="color: forestgreen"></i>JSON -
+                                    Импортировать из JSON</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Настройка элемента
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+                             data-parent="#accordionExample">
+                            <div class="card-body">
+                                Чтобы настроить элемент нажмите на него. Вы увидите окно с настройками элемента. Тут так
+                                же можно удалить элемент(и его связи) и добавить связь.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#collapseThree" aria-expanded="false"
+                                        aria-controls="collapseThree">
+                                    Удаление Элемента
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                             data-parent="#accordionExample">
+                            <div class="card-body">
+                                Элемент можно удалить в его настройках при этом удалятся и его связи. Так же можно
+                                нажать кнопку очистить рабочее поле.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    {% endblock %}
+
+    {% block modal %}
+        <div class="modal fade bd-example-modal-lg" id="settingsModal" tabindex="-1" role="dialog" data-name=""
+             data-circle1="" data-labelOps="">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h3>Настройки</h3>
+                        <form>
+                            <div class="form-group">
+                                <label for="ops" id="labelOps"> </label>
+                                <input type="text" class="form-control form-control-lg" id="nodeName">
+                            </div>
+                        </form>
+                        <hr>
+                        <h3>Связь</h3>
+                        <form class="form-inline my-2 my-lg-0">
+                            <div class="form-group">
+                                <input type="text" id="circle1" class="form-control pl-2 ml-2 mr-2" readonly value="">
+                            </div>
+                            <div class="form-group">
+                                <select class="form-control pl-3 ml-3 mr-3" id="select2">
+                                </select>
+                            </div>
+                            <button class="btn btn-outline-success my-2 my-sm-0" onclick="Connect()" type="button">
+                                Соеденить
+                            </button>
+                        </form>
+                        <hr>
+                        <h3>Добавить состояние</h3>
+                        <form class="form-inline my-2 my-lg-0">
+                            <div class="form-group">
+                                <input type="text" class="form-control pl-2 ml-2 mr-2" id="StateName"
+                                       placeholder="Название состояния">
+                            </div>
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="AddState()">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </button>
+
+                        </form>
+                        <form>
+                            <div id="StateDiv">
+
+                            </div>
+                        </form>
+                        <hr>
+                        <div id="CPT">
+                            <h3>Заполнение ТУВ (CPT)</h3>
+                            <span>Не найдено настроек узла. Сохраните настройки, прежде чем заполнять ТУВ.</span>
+                            <div id="divCPT" style="max-height: 100%; max-width: 100%; overflow: scroll">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="saveNode" onclick="">Сохранить настройки
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                onclick="" id="deleteCircle">Удалить элемент
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="exportJSONmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Экспорт в JSON</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Скопируйте чтобы сохранить JSON графического представления сети</p>
+                        <p><textarea class="form-control" id="exportJSONview" rows="5" cols="80" readonly></textarea></p>
+                        <hr>
+                        <p>Скопируйте чтобы сохранить JSON данных сети</p>
+                        <p><textarea class="form-control" id="exportJSONdata" rows="5" cols="80" readonly></textarea></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="importJSONmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Импорт из JSON</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Скопируйте сюда JSON представления сети</p>
+                        <p><textarea class="form-control" id="importJSONview" rows="5" cols="80" ></textarea></p>
+                        <hr>
+                        <p>Скопируйте сюда JSON данных сети</p>
+                        <p><textarea class="form-control" id="importJSONdata" rows="5" cols="80" ></textarea></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" onclick="JSONImport()">Импортировать</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    {% block js %}
+        <script
+                src="http://code.jquery.com/jquery-3.3.1.js"
+                integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+                crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+                integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+                crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+                integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+                crossorigin="anonymous"></script>
+                <script src="https://cdn.rawgit.com/konvajs/konva/2.0.3/konva.min.js"></script>
+{#        <script src="https://cdn.rawgit.com/konvajs/konva/0.13.0/konva.min.js"></script>#}
+
+
+    {% endblock %}
+    {% block cistom_js %}
+        <script id="global">
+            var net_data = {
+                name: "bayes_net_one",
+                nodes: [],
+                type: "causal",
+                //rest_handler_url: null,
+                data_nodes: []
+            };
+            var editedCircleId = undefined;
+
+            var net_data_example = {
+                "net_name": "bayes_net_1",
+                "nodes": [
+                    {
+                        "id": 0,
+                        "name": "Факт1",
+                        "conditional": true, //если тру условная вероятность если фалс безусловная
+                        "relations": [{"SOURCE": 0, "destination": 1}, {"source": 0, "destination": 2}], // связи. хранятся связь откуда куда исходящие(пока)
+                        "cpt": [
+                            null
+                        ],
+                        "states": []
+
+                    }
+
+                ],
+                "type": "classic", // or ???
+                "rest_handler_url": null,
+                "data_nodes": [     // данные для этой сети то есть выбранные переменные
+                    {"1": 1, "2": 1}
+                ]
+            };
+            var width = $("#divWith").width() - $("#minus").width() + 100;
+            var height = window.innerHeight;
+            var stage = new Konva.Stage({
+                container: 'canvas',
+                width: width,
+                height: height
+            });
+            var layer = new Konva.Layer();
+            window.FactsId = 1;
+            window.HypothesisId = 1;
+            stage.add(layer);
+
+            function AddState() {
+
+                var name = $("#StateName").val();
+
+                $("#StateDiv").append(
+                    '<div class="m-2"> <span> <input type="radio" name="state" value="' + name + '" class="stateValue mr-2"> <span class="state">' + name + '</span></span>' + '<button class="btn btn-outline-danger my-2 my-sm-0 ml-3 mr-3" onclick="DeleteState()"><i class="fa fa-times" aria-hidden="true"></i>\n </button> </div>'
+                )
+
+            }
+
+
+            function AddFact() {
+                var circle = new Konva.Circle({
+                    x: stage.width() / 2,
+                    y: stage.height() / 2,
+                    radius: 35,
+                    fill: 'transparent',
+                    stroke: 'blue',
+                    strokeWidth: 4,
+                    draggable: true,
+                    id: 'F' + window.FactsId
+                });
+                circle.setAttr('name', 'Факт ' + FactsId);
+
+                var text = new Konva.Text({
+                    x: circle.getX(),
+                    y: circle.getY() + 10,
+                    text: circle.getAttr('id'),
+                    fontSize: 15,
+                    fontFamily: 'Calibri',
+                    fill: 'green',
+                    id: 'T' + circle.getAttr('id')
+                });
+
+                layer.add(circle);
+                layer.add(text);
+                layer.draw();
+
+                $('#select2').append(
+                    ' <option>' + 'F' + FactsId + '</option>'
+                );
+
+
+                window.FactsId = window.FactsId + 1;
+
+                circle.on('click', function () {
+                        editedCircleId = circle.getAttr('id');
+                        // делаем дату для определенного факта
+                        $('#settingsModal').attr('data-name', circle.attrs.name);
+                        $('#settingsModal').attr('data-circle1', editedCircleId);
+                        $('#settingsModal').attr('data-labelOps', 'Описание факта');
+
+                        // расставляем дату в определенные элементы
+                        $('.modal-title').text($('#settingsModal').attr('data-name'));
+                        $('#circle1').val($('#settingsModal').attr('data-circle1'));
+                        $('#labelOps').text($('#settingsModal').attr('data-labelOps'));
+                        {#//$('#deleteCircle').on('click', function () { // удаление ноды#}
+                        {#//    RemoveCircle(editedCircleId);#}
+                        {#//});#}
+
+
+                        SetSettingsNode(editedCircleId); //заполняем настройки если есть
+
+                        // открываем модальное окно настроек
+                        $('#settingsModal').modal('toggle')
+
+                    }
+                );
+                circle.on('dragmove', function () {
+                    TextMove(circle.getAttr('id'));
+                    if (layer.find('Arrow')) {
+                        ArrowMove(circle.getAttr('id'))
+
+                    }
+                });
+
+
+            }
+
+            $('#saveNode').click(function () {  //сохраннеие ноды
+                SaveNode(editedCircleId);
+                $('#settingsModal').modal('toggle')
+            });
+
+            function AddHypothesis() {
+                var circle = new Konva.Circle({
+                    x: stage.width() / 2,
+                    y: stage.height() / 2,
+                    radius: 35,
+                    fill: 'transparent',
+                    stroke: 'purple',
+                    strokeWidth: 4,
+                    draggable: true,
+                    id: 'H' + HypothesisId
+                });
+                circle.setAttr('name', 'Гипотеза ' + FactsId);
+
+                var text = new Konva.Text({
+                    x: circle.getX(),
+                    y: circle.getY() + 10,
+                    text: circle.getAttr('id'),
+                    fontSize: 15,
+                    fontFamily: 'Calibri',
+                    fill: 'green',
+                    id: 'T' + circle.getAttr('id')
+                });
+
+                layer.add(circle);
+                layer.add(text);
+                layer.draw();
+
+
+                $('#select2').append(
+                    ' <option>' + 'H' + HypothesisId + '</option>'
+                );
+
+                circle.on('click touchend', function () {
+                        var id = circle.getAttr('id');
+                        // делаем дату для определенного факта
+                        $('#settingsModal').attr('data-name', circle.attrs.name);
+                        $('#settingsModal').attr('data-circle1', id);
+                        $('#settingsModal').attr('data-labelOps', 'Описание факта');
+
+                        // расставляем дату в определенные элементы
+                        $('.modal-title').text($('#settingsModal').attr('data-name'));
+                        $('#circle1').val($('#settingsModal').attr('data-circle1'));
+                        $('#labelOps').text($('#settingsModal').attr('data-labelOps'));
+                        $('#deleteCircle').on('click', function () {
+                            RemoveCircle(id);
+                        });
+
+
+                        // открываем модальное окно настроек
+                        $('#settingsModal').modal('toggle')
+
+                    }
+                );
+
+                window.HypothesisId = window.HypothesisId + 1;
+
+
+                circle.on('dragmove', function () {
+                    TextMove(circle.getAttr('id'));
+                    if (layer.find('Arrow')) {
+                        ArrowMove(circle.getAttr('id'));
+
+                    }
+                });
+
+            }
+
+
+            function ClearWorkSpace() {
+                stage.destroyChildren();
+                $('#select2').html('');
+                FactsId = 1;
+                HypothesisId = 1;
+                stage.add(layer)
+            }
+
+            function Connect() {
+                circle1ID = $('#circle1').val();
+                circle2ID = $('#select2').val();
+                circle1 = layer.findOne('#' + circle1ID);
+                circle2 = layer.findOne('#' + circle2ID);
+
+                var arrow = new Konva.Arrow({
+                    points: [circle1.getX(), circle1.getY(), circle2.getX(), circle2.getY()],
+                    pointerLength: 10,
+                    pointerWidth: 10,
+                    fill: 'black',
+                    stroke: 'black',
+                    strokeWidth: 2,
+                    id: 'arrow' + circle1ID + circle2ID
+                });
+                arrow.setAttr('circleOne', circle1ID);
+                arrow.setAttr('circleTwo', circle2ID);
+                layer.add(arrow);
+                layer.draw();
+
+
+            }
+
+            function ArrowMove(id) {
+                var arrowsOutgoing = [];
+                var arrowsIncoming = [];
+                var circleAnotherOutgoing = [];
+                var circleAnotherIncoming = [];
+                var arrows = layer.find('Arrow');
+                var circle = layer.findOne('#' + id);
+                for (var i = 0; i < arrows.length; i++) {
+                    if (arrows[i].attrs.circleOne == id.toString()) {
+                        arrowsOutgoing.push(arrows[i]);
+                        circleAnotherOutgoing.push(layer.findOne('#' + arrows[i].attrs.circleTwo));
+                    }
+
+                    if (arrows[i].attrs.circleTwo == id.toString()) {
+                        arrowsIncoming.push(arrows[i]);
+                        circleAnotherIncoming.push(layer.findOne('#' + arrows[i].attrs.circleOne));
+
+                    }
+                }
+
+
+                for (var i = 0; i < arrowsOutgoing.length; i++) {
+                    if (arrowsOutgoing.length) {
+                        arrowsOutgoing[i].setAttr('points', [circle.getX(), circle.getY(), circleAnotherOutgoing[i].getX(), circleAnotherOutgoing[i].getY()]);
+
+                    }
+                }
+                for (var i = 0; i < arrowsIncoming.length; i++) {
+                    if (arrowsIncoming.length) {
+                        arrowsIncoming[i].setAttr('points', [circleAnotherIncoming[i].getX(), circleAnotherIncoming[i].getY(), circle.getX(), circle.getY()]);
+                        layer.draw()
+                    }
+                }
+
+
+            }
+
+            function TextMove(id) {
+                var text = layer.findOne('#T' + id);
+                var circle = layer.findOne('#' + id);
+                text.setAttr('x', circle.getX());
+                text.setAttr('y', circle.getY() + 10);
+                layer.draw()
+
+            }
+
+            function RemoveCircle(id) {
+                var circle = layer.findOne('#' + id);
+                var text = layer.findOne('#T' + id);
+                var arrows = [];
+
+                var arrowslayer = layer.find('Arrow');
+
+                for (var i = 0; i < arrowslayer.length; i++) {
+                    if (arrowslayer[i].attrs.circleOne == id) {
+                        arrows.push(arrowslayer[i]);
+                    }
+
+                    if (arrowslayer[i].attrs.circleTwo == id) {
+                        arrows.push(arrowslayer[i]);
+                    }
+                }
+
+                for (var i = 0; i < arrows.length; i++) {
+                    arrows[i].destroy()
+                }
+
+                $('option:contains(' + id + ')').remove();
+
+                circle.destroy();
+                text.destroy();
+                layer.draw();
+                $('#settingsModal').modal('toggle')
+            }
+
+            function SaveNode(id) {
+
+                for (i = 0; i < net_data.nodes.length; i++) {
+                    if (net_data.nodes[i].id == id) {
+                        net_data.nodes.splice(i, 1)
+                    }
+                }
+
+                var node = {
+                    id: id,
+                    name: $("#nodeName").val(),
+                    conditional: false, //если тру условная вероятность если фалс безусловная
+                    relations: {
+                        source: [],
+                        destination: []
+                    }, // связи.
+                    cpt: [],
+                    states: [],
+                    checkstate: $("input[name=state]:checked").val()
+
+                };
+
+                if (node.states.length > 0) {
+                    //TODO логика для сохраннения CPT
+
+                    var cpt = [];
+                    var cptblock = {
+
+                        name: undefined,
+                        val: undefined
+
+                    }
+
+                }
+
+                var a = $(".state");
+
+                for (var i = 0; i < a.length; i++) {
+                    node.states.push(a[i].textContent);
+                }
+
+
+                var arrows = layer.find('Arrow');
+                for (var i = 0; i < arrows.length; i++) {
+                    if (arrows[i].attrs.circleOne == id.toString()) {
+                        node.relations.source.push(arrows[i].attrs.circleTwo)
+
+                    }
+
+                    if (arrows[i].attrs.circleTwo == id.toString()) {
+                        node.relations.destination.push(arrows[i].attrs.circleOne)
+                    }
+                }
+
+                if (node.relations.destination.length != 0) {
+                    node.conditional = true
+                }
+
+
+                net_data.nodes.push(node);
+
+
+            }
+
+            function SetSettingsNode(id) {
+                $("#nodeName").val('');
+                $("#StateDiv").html('');
+                $("#divCPT").html('');
+                for (var i = 0; i < net_data.nodes.length; i++) {
+                    if (net_data.nodes[i].id == id) {
+                        var node = net_data.nodes[i];
+                        break;
+                    }
+                }
+
+                if (node) {
+
+                    $("#nodeName").val(node.name);
+
+                    for (var i = 0; i < node.states.length; i++) {
+                        $("#StateDiv").append(
+                            '<div class="m-2"> <span> <input type="radio" name="state" value="' + node.states[i] + '" class="stateValue mr-2"> <span class="state">' + node.states[i] + '</span></span>' + '<button class="btn btn-outline-danger my-2 my-sm-0 ml-3 mr-3" onclick="DeleteState()"><i class="fa fa-times" aria-hidden="true"></i>\n </button> </div>'
+                        );
+                        if ($('.stateValue').last().val() == node.checkstate) {
+                            $('.stateValue').last().prop('checked', true)
+                        }
+                    }
+
+                    if (node.states.length != 0) {
+
+                        GenerateCPT(id);
+
+                    }
+
+                    //TODO логика для заполнения ТУВ
+                }
+
+            }
+
+            function GenerateCPT(id) {
+                $("#CPT span").html('');
+
+                for (var i = 0; i < net_data.nodes.length; i++) {
+                    if (net_data.nodes[i].id == id) {
+                        var node = net_data.nodes[i];
+                        break;
+                    }
+                }
+
+                var relationstate = [];
+
+                for (var i = 0; i < node.relations.destination.length; i++) {
+                    for (var j = 0; j < net_data.nodes.length; j++) {
+                        if (net_data.nodes[j].id == node.relations.destination[i]) {
+                            var relation = {
+                                name: net_data.nodes[j].name,
+                                states: net_data.nodes[j].states
+                            };
+                            relationstate.push(relation)
+                        }
+                    }
+                }
+
+                relationstate.sort(
+                    function (a, b) {
+                        if (a.states.length > b.states.length) {
+                            return 1
+                        }
+                        if (a.states.length < b.states.length) {
+                            return -1
+                        }
+                        else {
+                            return 0
+                        }
+
+                    }
+                );
+
+
+                var table = {
+                    tr: [],
+                    td: []
+                };
+
+                for (var i = 0; i < relationstate.length; i++) {
+                    table.tr.push(relationstate[i].name);
+                    table.td.push(relationstate[i].states)
+                }
+                // последняя строка на которую нет столбцов (там инпуты)
+                for (var i = 0; i < node.states.length; i++) {
+                    table.tr.push(node.states[i])
+                }
+
+
+                var colspn1 = 1;
+                var colspn2 = 1;
+                if (node.conditional) {
+                    var count = table.td[0].length;
+
+                }
+                var tablegen = '<table class="table table-bordered table-sm" style="text-align: center">';
+
+                for (var i = 0; i < table.tr.length - node.states.length; i++) {  //для строк
+                    colspn2 = colspn1;
+                    colspn1 = 1;
+
+
+                    for (var iter = i + 1; iter < table.tr.length - node.states.length; iter++) {
+                        colspn1 = colspn1 * table.td[iter].length
+                    }
+
+                    tablegen += '<tr>';
+
+                    if (i == 0) {
+                        tablegen += '<td id="nodename'+ table.tr[i] +'"><b>' + table.tr[i] + '</b> </td>'; //генерим столбец + название состояния в него
+                        for (var j = 0; j < table.td[i].length; j++) {
+                            tablegen += '<td colspan="' + colspn1 + '" id="nodename'+ table.tr[i] +'statename'+ table.td[i][j] +'">' + table.td[i][j] + ' </td>';  //генерим столбец + название состояния в него + колспан в кол-ве предыдущих состояний
+                        }
+                    }
+                    else {
+
+                        for (var k = 0; k <= count; k++) {
+                            if (k == 0) {
+                                tablegen += '<td id="nodename'+ table.tr[i] +'"><b>' + table.tr[i] + '</b> </td>'; //генерим столбец + название состояния в него
+                            }
+                            else {
+                                for (var j = 0; j < table.td[i].length; j++) {
+
+                                    tablegen += '<td colspan="' + colspn1 + '" id="nodename'+ table.tr[i] +'statename'+ table.td[i][j] +'">' + table.td[i][j] + ' </td>';  //генерим столбец + название состояния в него + колспан в кол-ве предыдущих состояний
+                                }
+                            }
+
+                        }
+                        count = j * (k - 1);
+
+                    }
+
+
+                    tablegen += '</tr>';
+                }
+
+                var statesnodecount = 1;
+
+                for (var i = 0; i < table.tr.length - node.states.length; i++) {
+                    statesnodecount = statesnodecount * table.td[i].length
+                }
+
+                for (var i = 0; i < node.states.length; i++) { // строки и столбцы для состояний текущего нода
+
+                    tablegen += '<tr>';
+                    tablegen += '<td><b>' + node.states[i] + '</b></td>';
+
+                    for (var j = 0; j < statesnodecount; j++) {
+                        tablegen += '<td id="nodethisstate'+ node.states[i]+ j + '"> <input type="text" id="state' + i + 'id' + j + '"> </td>'
+                    }
+
+                    tablegen += '</tr>';
+
+
+                }
+
+                tablegen += '</table>';
+
+                $("#divCPT").append(tablegen)
+
+            }
+
+            function ExportToJSON() {
+
+                var netview = stage.toJSON();
+                var netdata = JSON.stringify(net_data);
+
+                $('#exportJSONview').val(netview);
+                $('#exportJSONdata').val(netdata);
+
+                $('#exportJSONmodal').modal('toggle')
+            }
+
+            function JSONImport() {
+                var netview = $('#importJSONview').val();
+                var netdata = $('#importJSONdata').val();
+
+                stage = Konva.Node.create(netview, 'canvas');
+                net_data = JSON.parse(netdata);
+
+                $('#importJSONmodal').modal('toggle')
+
+            }
+            
+            function DemoTree() {
+                
+            }
+            
+            function DemoVisitToAsia() {
+                
+            }
+
+
+        </script>
+    {% endblock %}
+{% endblock %}
+</body>
+</html>
